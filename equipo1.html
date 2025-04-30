@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Rendimiento en Redes Sociales</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f7f7;
+            color: #333;
+        }
+        .dashboard-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .column {
+            flex: 1;
+            min-width: 30%;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1E88E5;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #0D47A1;
+            border-bottom: 2px solid #1E88E5;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        h3 {
+            color: #0D47A1;
+            margin-top: 0;
+        }
+        .chart-container {
+            margin: 20px 0;
+            height: 300px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .interpretation {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #1E88E5;
+            margin: 15px 0;
+        }
+        .expander {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .expander-header {
+            background-color: #f2f2f2;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .expander-content {
+            padding: 15px;
+            display: none;
+        }
+        .show {
+            display: block;
+        }
+        .divider {
+            border-top: 1px solid #ddd;
+            margin: 20px 0;
+        }
+        .selector {
+            margin-bottom: 15px;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard de Rendimiento en Redes Sociales</h1>
+    
+    <div class="dashboard-container">
+        <!-- Columna 1: Crecimiento de Seguidores -->
+        <div class="column">
+            <h3>Crecimiento de Seguidores</h3>
+            <p><em>(Seguidores actuales / deseados) * 100</em></p>
+            
+            <div>
+                <label for="redSocial">Selecciona red social:</label>
+                <select id="redSocial" class="selector" onchange="actualizarGraficoCrecimiento()">
+                    <option value="Facebook">Facebook</option>
+                    <option value="Instagram">Instagram</option>
+                    <option value="TikTok">TikTok</option>
+                </select>
+            </div>
+            
+            <div class="chart-container">
+                <canvas id="crecimientoChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Columna 2: Engagement Rate -->
+        <div class="column">
+            <h3>Engagement Rate</h3>
+            <p><em>(Total interacciones / alcance) * 100</em></p>
+            
+            <div class="chart-container">
+                <canvas id="engagementChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- Columna 3: Frecuencia de Publicaciones -->
+        <div class="column">
+            <h3>Frecuencia de Publicaciones</h3>
+            <p><em>(Publicaciones realizadas / planeadas) * 100</em></p>
+            
+            <div class="chart-container">
+                <canvas id="frecuenciaChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="divider"></div>
+    
+    <div class="dashboard-container">
+        <!-- Interpretación Crecimiento -->
+        <div class="column">
+            <div class="expander">
+                <div class="expander-header" onclick="toggleExpander('interpretacionCrecimiento')">
+                    Interpretación Crecimiento
+                </div>
+                <div id="interpretacionCrecimiento" class="expander-content">
+                    <ul>
+                        <li><strong>0-50%:</strong> Aún falta para alcanzar la meta</li>
+                        <li><strong>51-59%:</strong> A mitad de la meta</li>
+                        <li><strong>60-99%:</strong> Cerca de alcanzar la meta</li>
+                        <li><strong>100%+:</strong> Meta lograda</li>
+                    </ul>
+                    
+                    <p><strong>Significado de las variables:</strong></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Variable</th>
+                                <th>Significado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Seguidores actuales</td>
+                                <td>Cantidad de seguidores que se han tenido por mes.</td>
+                            </tr>
+                            <tr>
+                                <td>Seguidores deseados</td>
+                                <td>Cantidad de seguidores que buscas tener al finalizar un periodo de tiempo.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interpretación Engagement -->
+        <div class="column">
+            <div class="expander">
+                <div class="expander-header" onclick="toggleExpander('interpretacionEngagement')">
+                    Interpretación Engagement
+                </div>
+                <div id="interpretacionEngagement" class="expander-content">
+                    <ul>
+                        <li><strong>0-33%:</strong> Nivel bajo de interacción</li>
+                        <li><strong>34-66%:</strong> Nivel moderado de interacción</li>
+                        <li><strong>67%+:</strong> Nivel alto de interacción</li>
+                    </ul>
+                    
+                    <p><strong>Significado de las variables:</strong></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Variable</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Total interacciones</td>
+                                <td>Número total de interacciones (likes + comentarios + compartidos) en el conjunto de publicaciones por mes.</td>
+                            </tr>
+                            <tr>
+                                <td>Alcance</td>
+                                <td>Número de personas que han visto el contenido.</td>
+                            </tr>
+                            <tr>
+                                <td>Engagement Rate</td>
+                                <td>Métrica que mide la interacción de los usuarios con el contenido, expresada como un porcentaje.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interpretación Frecuencia -->
+        <div class="column">
+            <div class="expander">
+                <div class="expander-header" onclick="toggleExpander('interpretacionFrecuencia')">
+                    Interpretación Frecuencia
+                </div>
+                <div id="interpretacionFrecuencia" class="expander-content">
+                    <ul>
+                        <li><strong>100%+:</strong> Calendario cumplido o superado</li>
+                        <li><strong>&lt;100%:</strong> No se alcanzó el objetivo</li>
+                    </ul>
+                    
+                    <p><strong>Significado de las variables</strong></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Variables de la formula</th>
+                                <th>Significado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Publicaciones realizadas</td>
+                                <td>Número de publicaciones realizadas en una red social.</td>
+                            </tr>
+                            <tr>
+                                <td>Publicaciones planeadas</td>
+                                <td>Número de publicaciones planificadas en el calendario.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle para los expandables
+        function toggleExpander(id) {
+            const content = document.getElementById(id);
+            content.classList.toggle('show');
+        }
+
+        // Datos para gráficos (simulados basados en el código Python)
+        // En una aplicación real estos datos vendrían de archivos CSV cargados
+        
+        // Datos para Crecimiento de Seguidores
+        const datosCrecimiento = {
+            'Facebook': {
+                periodos: ['Crecimiento_sept', 'Crecimiento_oct', 'Crecimiento_nov'],
+                valores: [45, 72, 93]
+            },
+            'Instagram': {
+                periodos: ['Crecimiento_sept', 'Crecimiento_oct', 'Crecimiento_nov'],
+                valores: [58, 81, 110]
+            },
+            'TikTok': {
+                periodos: ['Crecimiento_sept', 'Crecimiento_oct', 'Crecimiento_nov'],
+                valores: [35, 65, 88]
+            }
+        };
+        
+        // Datos para Engagement Rate
+        const datosEngagement = {
+            'Facebook': [4.5, 5.3, 7.1],
+            'Instagram': [6.2, 8.5, 9.8],
+            'TikTok': [7.8, 10.2, 12.5]
+        };
+        
+        // Datos para Frecuencia de Publicaciones
+        const datosFrecuencia = {
+            meses: ['Septiembre', 'Octubre', 'Noviembre'],
+            'Facebook': [85, 95, 110],
+            'Instagram': [90, 100, 105],
+            'TikTok': [75, 85, 95]
+        };
+
+        // Gráfico de Crecimiento de Seguidores
+        let crecimientoChart;
+        function actualizarGraficoCrecimiento() {
+            const redSocial = document.getElementById('redSocial').value;
+            const datos = datosCrecimiento[redSocial];
+            
+            // Destruir el gráfico anterior si existe
+            if (crecimientoChart) {
+                crecimientoChart.destroy();
+            }
+            
+            // Formatear mejor los nombres de los periodos para la gráfica
+            const periodosMostrados = datos.periodos.map(p => p.replace('Crecimiento_', ''));
+            
+            const ctx = document.getElementById('crecimientoChart').getContext('2d');
+            crecimientoChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: periodosMostrados,
+                    datasets: [
+                        {
+                            label: 'Tasa de Crecimiento (%)',
+                            data: datos.valores,
+                            backgroundColor: [
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 159, 64, 0.7)',
+                                'rgba(153, 102, 255, 0.7)'
+                            ],
+                            borderColor: [
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 159, 64, 1)',
+                                'rgba(153, 102, 255, 1)'
+                            ],
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Tasa de Crecimiento (%)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Periodo'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Crecimiento en ${redSocial}`
+                        },
+                        annotation: {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    yMin: 100,
+                                    yMax: 100,
+                                    borderColor: 'red',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        content: 'Meta (100%)',
+                                        enabled: true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Añadir línea de meta manualmente ya que Chart.js básico no tiene anotaciones
+            const metaDataset = {
+                label: 'Meta (100%)',
+                data: [100, 100, 100],
+                type: 'line',
+                borderColor: 'red',
+                borderDash: [5, 5],
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: false
+            };
+            
+            crecimientoChart.data.datasets.push(metaDataset);
+            crecimientoChart.update();
+        }
+
+        // Gráfico de Engagement Rate
+        const engagementCtx = document.getElementById('engagementChart').getContext('2d');
+        const engagementChart = new Chart(engagementCtx, {
+            type: 'line',
+            data: {
+                labels: ['Septiembre', 'Octubre', 'Noviembre'],
+                datasets: [
+                    {
+                        label: 'Facebook',
+                        data: datosEngagement['Facebook'],
+                        borderColor: 'rgb(54, 162, 235)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        pointBackgroundColor: 'rgb(54, 162, 235)',
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Instagram',
+                        data: datosEngagement['Instagram'],
+                        borderColor: 'rgb(255, 99, 132)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        pointBackgroundColor: 'rgb(255, 99, 132)',
+                        tension: 0.1
+                    },
+                    {
+                        label: 'TikTok',
+                        data: datosEngagement['TikTok'],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        pointBackgroundColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Engagement Rate (%)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Mes'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Engagement por Red Social'
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Frecuencia de Publicaciones
+        const frecuenciaCtx = document.getElementById('frecuenciaChart').getContext('2d');
+        const frecuenciaChart = new Chart(frecuenciaCtx, {
+            type: 'bar',
+            data: {
+                labels: datosFrecuencia.meses,
+                datasets: [
+                    {
+                        label: 'Facebook',
+                        data: datosFrecuencia['Facebook'],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Instagram',
+                        data: datosFrecuencia['Instagram'],
+                        backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'TikTok',
+                        data: datosFrecuencia['TikTok'],
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'KPI Frecuencia (%)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Mes'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Frecuencia de Publicación'
+                    }
+                }
+            }
+        });
+        
+        // Añadir línea de meta al gráfico de frecuencia
+        const metaLine = {
+            label: 'Meta (100%)',
+            data: [100, 100, 100],
+            type: 'line',
+            borderColor: 'red',
+            borderDash: [5, 5],
+            borderWidth: 2,
+            pointRadius: 0,
+            fill: false
+        };
+        
+        frecuenciaChart.data.datasets.push(metaLine);
+        frecuenciaChart.update();
+        
+        // Inicializar el gráfico de crecimiento con el valor por defecto (Facebook)
+        document.addEventListener('DOMContentLoaded', function() {
+            actualizarGraficoCrecimiento();
+        });
+    </script>
+</body>
+</html>

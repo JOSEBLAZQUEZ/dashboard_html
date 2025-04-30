@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Análisis de Ventas</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            padding: 20px;
+        }
+        select, table {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .chart-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .chart {
+            width: 48%;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .footer {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Dashboard de Análisis de Ventas</h1>
+    </header>
+
+    <div class="container">
+        <label for="menu">Selecciona un Dashboard:</label>
+        <select id="menu" onchange="cambiarDashboard()">
+            <option value="participacion">Tasa de Participación de Ventas</option>
+            <option value="markup">Análisis de Markup</option>
+            <option value="conversion">Porcentaje de Prospectos que Realizan una Compra</option>
+            <option value="csat">Análisis del KPI: CSAT</option>
+        </select>
+
+        <!-- Dashboard Content -->
+        <div id="participacion" class="dashboard">
+            <h2>Tasa de Participación de Ventas</h2>
+            <p><strong>Fórmula del KPI:</strong> Tasa de Participación de Ventas = (Ventas del producto / Ventas totales) x 100</p>
+
+            <div class="chart-container">
+                <div class="chart">
+                    <h3>Gráfico de Tasa de Participación</h3>
+                    <canvas id="chartParticipacion"></canvas>
+                </div>
+                <div class="chart">
+                    <h3>Tabla de Resultados</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Modelo</th>
+                                <th>Tasa de Participación (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Modelo A</td><td>45%</td></tr>
+                            <tr><td>Modelo B</td><td>30%</td></tr>
+                            <tr><td>Modelo C</td><td>25%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="markup" class="dashboard" style="display: none;">
+            <h2>Análisis de Markup</h2>
+            <p><strong>Fórmula:</strong> (Precio de venta - Costo de adquisición / Costo de adquisición) x 100</p>
+
+            <div class="chart-container">
+                <div class="chart">
+                    <h3>Gráfico de Markup</h3>
+                    <canvas id="chartMarkup"></canvas>
+                </div>
+                <div class="chart">
+                    <h3>Tabla de Markup</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Markup (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Vidrio Templado</td><td>900%</td></tr>
+                            <tr><td>Pantalla Completa</td><td>366.67%</td></tr>
+                            <tr><td>Vidrio de Privacidad</td><td>166.67%</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="conversion" class="dashboard" style="display: none;">
+            <h2>Porcentaje de Prospectos que Realizan una Compra</h2>
+            <p><strong>Fórmula:</strong> Tasa de conversión = (Ventas cerradas / Prospectos totales) x 100</p>
+
+            <div class="chart-container">
+                <div class="chart">
+                    <h3>Gráfico de Conversión</h3>
+                    <canvas id="chartConversion"></canvas>
+                </div>
+                <div class="chart">
+                    <h3>Tabla de Prospectos y Ventas</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Prospecto</th>
+                                <th>Ventas Cerradas</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Prospecto 1</td><td>1</td></tr>
+                            <tr><td>Prospecto 2</td><td>0</td></tr>
+                            <tr><td>Prospecto 3</td><td>1</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="csat" class="dashboard" style="display: none;">
+            <h2>Análisis del KPI: CSAT</h2>
+            <p><strong>Fórmula:</strong> CSAT = (Número de respuestas 'Satisfecho' / Número total de respuestas) x 100</p>
+
+            <div class="chart-container">
+                <div class="chart">
+                    <h3>Gráfico de CSAT</h3>
+                    <canvas id="chartCSAT"></canvas>
+                </div>
+                <div class="chart">
+                    <h3>Tabla de Resultados de CSAT</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Respuestas</th>
+                                <th>Frecuencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Satisfecho</td><td>120</td></tr>
+                            <tr><td>Insatisfecho</td><td>30</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Función para cambiar el contenido mostrado según el menú seleccionado
+        function cambiarDashboard() {
+            var seleccion = document.getElementById('menu').value;
+            var dashboards = document.querySelectorAll('.dashboard');
+            dashboards.forEach(function(dashboard) {
+                dashboard.style.display = 'none';
+            });
+            document.getElementById(seleccion).style.display = 'block';
+        }
+
+        // Inicializar mostrando el primer dashboard
+        cambiarDashboard();
+
+        // Gráfico de Tasa de Participación
+        var ctxParticipacion = document.getElementById('chartParticipacion').getContext('2d');
+        var chartParticipacion = new Chart(ctxParticipacion, {
+            type: 'pie',
+            data: {
+                labels: ['Modelo A', 'Modelo B', 'Modelo C'],
+                datasets: [{
+                    label: 'Tasa de Participación',
+                    data: [45, 30, 25],
+                    backgroundColor: ['#ff6384', '#36a2eb', '#ffcd56'],
+                    borderColor: ['#fff', '#fff', '#fff'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.label + ': ' + tooltipItem.raw + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Markup
+        var ctxMarkup = document.getElementById('chartMarkup').getContext('2d');
+        var chartMarkup = new Chart(ctxMarkup, {
+            type: 'bar',
+            data: {
+                labels: ['Vidrio Templado', 'Pantalla Completa', 'Vidrio de Privacidad'],
+                datasets: [{
+                    label: 'Markup (%)',
+                    data: [900, 366.67, 166.67],
+                    backgroundColor: '#4CAF50',
+                    borderColor: '#fff',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.label + ': ' + tooltipItem.raw + '%';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Conversión
+        var ctxConversion = document.getElementById('chartConversion').getContext('2d');
+        var chartConversion = new Chart(ctxConversion, {
+            type: 'line',
+            data: {
+                labels: ['Prospecto 1', 'Prospecto 2', 'Prospecto 3'],
+                datasets: [{
+                    label: 'Tasa de Conversión',
+                    data: [100, 0, 100],
+                    borderColor: '#ff6384',
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+
+        // Gráfico de CSAT
+        var ctxCSAT = document.getElementById('chartCSAT').getContext('2d');
+        var chartCSAT = new Chart(ctxCSAT, {
+            type: 'doughnut',
+            data: {
+                labels: ['Satisfecho', 'Insatisfecho'],
+                datasets: [{
+                    label: 'CSAT',
+                    data: [120, 30],
+                    backgroundColor: ['#36a2eb', '#ff6384'],
+                    borderColor: ['#fff', '#fff'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+

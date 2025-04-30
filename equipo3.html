@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Análisis Publicitario</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f7f7f7;
+            color: #333;
+        }
+        .dashboard-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+        .column {
+            flex: 1;
+            min-width: 30%;
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #1E88E5;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #0D47A1;
+            border-bottom: 2px solid #1E88E5;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .chart-container {
+            margin: 20px 0;
+            height: 300px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .emphasis {
+            font-weight: bold;
+            color: #1E88E5;
+        }
+        .interpretation {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #1E88E5;
+            margin: 15px 0;
+        }
+        .tab-container {
+            margin-bottom: 20px;
+        }
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #f1f1f1;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 16px;
+            border-radius: 5px 5px 0 0;
+        }
+        .tab-button:hover {
+            background-color: #ddd;
+        }
+        .tab-button.active {
+            background-color: #1E88E5;
+            color: white;
+        }
+        .tab-content {
+            display: none;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dashboard de Análisis Publicitario</h1>
+    
+    <div class="dashboard-container">
+        <!-- Columna 1: KPI de Incremento en Alcance -->
+        <div class="column">
+            <h2>KPI 1: Porcentaje de Incremento en el alcance durante el pago de publicidad</h2>
+            
+            <p><strong>Fórmulas utilizadas:</strong></p>
+            <ol>
+                <li>Diferencia de Alcance = Alcance con Publicidad − Alcance Sin Publicidad</li>
+                <li>Porcentaje de Incremento = (diferencia de alcance / alcance sin publicidad) x 100</li>
+            </ol>
+            
+            <div class="chart-container">
+                <canvas id="incrementoAlcanceChart"></canvas>
+            </div>
+            
+            <p><strong>Las variables utilizadas fueron:</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Variable</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Periodo</td>
+                        <td>Clasifica las fechas en los periodos Pre-Publicidad (09/09/2024 - 21/10/2024), Durante Publicidad (22/10/2024 - 27/10/2024) y Post-Publicidad (28/10/2024 - 15/11/2024).</td>
+                    </tr>
+                    <tr>
+                        <td>Red de alcance</td>
+                        <td>Muestra a qué red social pertenece el alcance.</td>
+                    </tr>
+                    <tr>
+                        <td>Cantidad</td>
+                        <td>Muestra la cantidad de alcance por día independientemente de la publicación.</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="interpretation">
+                <p><strong>Interpretaciones:</strong></p>
+                <p>La gráfica muestra que el alcance incrementó un 683% en Facebook y 338% en Instagram respecto al promedio del periodo orgánico. 
+                <strong>El periodo de publicidad pagada superó el 20% esperado en un 663% en Facebook y 318% en Instagram.</strong></p>
+                <p>Cabe mencionar que la cantidad de datos en cada periodo difiere significativamente, ya que solo se pagaron 5 días de publicidad, lo cual puede afectar la exactitud de los resultados.</p>
+            </div>
+        </div>
+        
+        <!-- Columna 2: KPI de Comparación de Ventas -->
+        <div class="column">
+            <h2>KPI 2: Comparación de ventas previas y posteriores a la implementación de publicidad pagada</h2>
+            
+            <p><strong>Fórmula utilizada:</strong></p>
+            <ol>
+                <li>(Ventas posteriores con publicidad - Ventas previas a la publicidad) / Ventas previas sin publicidad * 100</li>
+            </ol>
+            
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-button active" onclick="openTab(event, 'kpi21')">KPI 2.1</button>
+                    <button class="tab-button" onclick="openTab(event, 'kpi22')">KPI 2.2</button>
+                </div>
+                
+                <div id="kpi21" class="tab-content active">
+                    <div class="chart-container">
+                        <canvas id="ventasComparisonChart"></canvas>
+                    </div>
+                    
+                    <p><strong>Las variables utilizadas fueron:</strong></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Variables</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Ventas previas sin publicidad</td>
+                                <td>Ventas realizadas antes de implementar publicidad pagada.</td>
+                            </tr>
+                            <tr>
+                                <td>Ventas posteriores con publicidad</td>
+                                <td>Ventas realizadas después de implementar publicidad pagada.</td>
+                            </tr>
+                            <tr>
+                                <td>Ventas posteriores sin publicidad</td>
+                                <td>Ventas realizadas después de terminar el periodo de publicidad pagada.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p><strong>Distribución de Ventas: Comparación con y sin Publicidad</strong></p>
+                    <table id="tablaResultados">
+                        <thead>
+                            <tr>
+                                <th>Tipo de Venta</th>
+                                <th>Total de Ventas ($)</th>
+                                <th>Porcentaje (%)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Previas con Publicidad</td>
+                                <td>0</td>
+                                <td>0</td>
+                            </tr>
+                            <tr>
+                                <td>Previas sin Publicidad</td>
+                                <td>12500</td>
+                                <td>100</td>
+                            </tr>
+                            <tr>
+                                <td>Posteriores con Publicidad</td>
+                                <td>7800</td>
+                                <td>72</td>
+                            </tr>
+                            <tr>
+                                <td>Posteriores sin Publicidad</td>
+                                <td>3000</td>
+                                <td>28</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="interpretation">
+                        <p><strong>Interpretación:</strong></p>
+                        <p>La gráfica compara las ventas previas y posteriores a la publicidad, diferenciando entre ventas con y sin publicidad.</p>
+                    </div>
+                </div>
+                
+                <div id="kpi22" class="tab-content">
+                    <div class="chart-container">
+                        <canvas id="totalVentasChart"></canvas>
+                    </div>
+                    
+                    <p><strong>Las variables utilizadas fueron:</strong></p>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Variables</th>
+                                <th>Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Ventas con publicidad</td>
+                                <td>Ventas realizadas relacionadas con la publicidad pagada</td>
+                            </tr>
+                            <tr>
+                                <td>Ventas sin publicidad</td>
+                                <td>Ventas realizadas que no están relacionadas con la publicidad pagada, ya sea previa o posteriormente</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="interpretation">
+                        <p><strong>Interpretación:</strong></p>
+                        <p>La gráfica muestra la distribución total de ventas con y sin publicidad pagada. El porcentaje asociado a ventas con publicidad es relevante para evaluar la efectividad de las campañas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Columna 3: KPI de Costo por Conversión -->
+        <div class="column">
+            <h2>KPI 3: Costo por Conversión (CPC) por venta generada</h2>
+            
+            <p><strong>Fórmulas utilizadas:</strong></p>
+            <ol>
+                <li>Con publicidad: CPC = Costo total de la publicidad (campaña) / Número total de conversiones.</li>
+                <li>Sin publicidad: Costo sin publicidad = Costo unitario × Cantidad de productos vendidos / Total de unidades vendidas sin publicidad</li>
+            </ol>
+            
+            <div class="chart-container">
+                <canvas id="costoConversionChart"></canvas>
+            </div>
+            
+            <p><strong>Las variables utilizadas fueron:</strong></p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Variables</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Costo Total de Publicidad</td>
+                        <td>El gasto total realizado en la campaña durante el periodo de publicidad pagada.</td>
+                    </tr>
+                    <tr>
+                        <td>Cantidad de Conversiones</td>
+                        <td>Las conversiones que se generaron gracias a la campaña, es decir, la cantidad de compras.</td>
+                    </tr>
+                    <tr>
+                        <td>Períodos con y sin Publicidad</td>
+                        <td>Los períodos donde fue pagada la publicidad (en este caso, 5 días) y los días que no había publicidad.</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="interpretation">
+                <p><strong>Interpretaciones:</strong></p>
+                <p>La gráfica nos muestra un CPC alto durante la publicidad, esto significa que la empresa está gastando 50 unidades monetarias en promedio, lo que indica que la campaña no fue tan efectiva. En contraste, el CPC sin invertir en publicidad es considerablemente más bajo con 15 unidades monetarias. Esto sugiere que la campaña de publicidad está siendo costosa en términos de retorno por cada conversión obtenida.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para cambiar entre pestañas
+        function openTab(evt, tabName) {
+            // Ocultar todos los contenidos de pestañas
+            var tabcontent = document.getElementsByClassName("tab-content");
+            for (var i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove("active");
+            }
+            
+            // Desactivar todos los botones de pestañas
+            var tablinks = document.getElementsByClassName("tab-button");
+            for (var i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove("active");
+            }
+            
+            // Mostrar la pestaña actual y activar el botón
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // Gráfico de Incremento en Alcance (KPI 1)
+        const incrementoAlcanceCtx = document.getElementById('incrementoAlcanceChart').getContext('2d');
+        const incrementoAlcanceChart = new Chart(incrementoAlcanceCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Facebook', 'Instagram'],
+                datasets: [{
+                    label: 'Incremento en Alcance (%)',
+                    data: [683, 338],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(153, 102, 255, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Porcentaje de Incremento (%)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Red Social'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Incremento en el Alcance Durante el Pago de Publicidad'
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Comparación de Ventas (KPI 2.1)
+        const ventasComparisonCtx = document.getElementById('ventasComparisonChart').getContext('2d');
+        const ventasComparisonChart = new Chart(ventasComparisonCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Previas', 'Posteriores'],
+                datasets: [
+                    {
+                        label: 'Ventas con publicidad',
+                        data: [0, 7800],
+                        backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Ventas sin publicidad',
+                        data: [12500, 3000],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Ventas ($)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Periodo'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Comparación de Ventas: Sin publicidad aplicada vs Con publicidad aplicada'
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Total de Ventas (KPI 2.2)
+        const totalVentasCtx = document.getElementById('totalVentasChart').getContext('2d');
+        const totalVentasChart = new Chart(totalVentasCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Con Publicidad', 'Sin Publicidad'],
+                datasets: [{
+                    label: 'Total de Ventas ($)',
+                    data: [7800, 15500],
+                    backgroundColor: [
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 159, 64, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Total de Ventas ($)'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Total de Ventas: Con y Sin Publicidad'
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Costo por Conversión (KPI 3)
+        const costoConversionCtx = document.getElementById('costoConversionChart').getContext('2d');
+        const costoConversionChart = new Chart(costoConversionCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Con Publicidad', 'Sin Publicidad'],
+                datasets: [{
+                    label: 'Costo ($)',
+                    data: [50, 15],
+                    backgroundColor: [
+                        'rgba(255, 192, 203, 0.7)',
+                        'rgba(173, 216, 230, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 192, 203, 1)',
+                        'rgba(173, 216, 230, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Costo ($)'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Costo por Conversión con y sin Publicidad'
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
